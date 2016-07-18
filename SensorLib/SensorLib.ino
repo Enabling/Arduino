@@ -15,6 +15,8 @@
 #include "keys.h"
 #include "device.h"
 #include "LowPower.h"
+#include "instrumentationParamEnum.h"
+#include "Sensor.h"
 
 #include <avr/wdt.h>
 #include <avr/sleep.h>
@@ -57,11 +59,11 @@ SoftwareSerial modemSerial(PIN_RX_RN2483, PIN_TX_RN2483);  // ARDUINO
 #endif
 
 // Which modem ??
-//#include "LoRaModemMicrochip.h"
-//LoRaModemMicrochip modem(&MODEM_SERIAL, &debugSerial);
+#include "LoRaModemMicrochip.h"
+LoRaModemMicrochip modem(&MODEM_SERIAL, &debugSerial);
 
-#include "LoRaModemMDot.h"
-LoRaModemMDot modem(&MODEM_SERIAL, &debugSerial);
+//#include "LoRaModemMDot.h"
+//LoRaModemMDot modem(&MODEM_SERIAL, &debugSerial);
 
 Device libTest(&modem, &debugSerial);
 GPSSensor gpsSensor;
@@ -74,6 +76,34 @@ volatile byte delayCnt = 0;
 volatile byte sensorSelect = 0;
 
 bool connection = false;
+
+
+void dumpModemParams(char sep = '\t'){
+    debugSerial.print(F("SF : "));
+    debugSerial.print(modem.getParam(SP_FACTOR));
+    debugSerial.print(sep);
+    debugSerial.print(F("POW : "));
+    debugSerial.print(modem.getParam(POWER_INDEX));
+    debugSerial.print(sep);
+    debugSerial.print(F("CR : "));
+    debugSerial.print(modem.getParam(CODING_RATE));
+    debugSerial.print(sep);
+    debugSerial.print(F("DC : "));
+    debugSerial.print(modem.getParam(DUTY_CYCLE));
+    debugSerial.print(sep);
+    debugSerial.print(F("SNR : "));
+    debugSerial.print(modem.getParam(SNR));
+    debugSerial.print(sep);
+    debugSerial.print(F("#GW : "));
+    debugSerial.print(modem.getParam(GATEWAY_COUNT));
+    debugSerial.print(sep);
+    debugSerial.print(F("#RETR : "));
+    debugSerial.print(modem.getParam(RETRANSMISSION_COUNT));
+    debugSerial.print(sep);
+    debugSerial.print(F("DR : "));
+    debugSerial.print(modem.getParam(DATA_RATE));
+    debugSerial.println();
+}
 
 void wakeUP_RN2483() {
 #ifdef LORAMODEMMICROCHIP_H_
@@ -207,78 +237,157 @@ void sendGPSData() {
 
 void sendSensor() {
 	switch (sensorSelect) {
-	case 0:
-		sendBoolSensor();
-		break;
-	case 1:
-		sendIntSensor();
-		break;
-	case 2:
-		sendFloatSensor();
-		break;
-	case 3:
-		sendBinaryDataSensor();
-		break;
-	case 4:
-		sendGPSSensor();
-		break;
-	case 5:
-		sendAccelSensor();
-		break;
+  	case 0:
+  		sendBoolSensor();
+  		break;
+    case 1:
+      sendBinaryTiltSensor();
+      break;
+    case 2:
+      sendPushButton();
+      break;
+    case 3:
+      sendDoorSensor();
+      break;
+  	case 4:
+  		sendTemperatureSensor();
+  		break;
+  	case 5:
+  		sendLightSensor();
+  		break;
+  	case 6:
+  		sendMotionSensor();
+  		break;
+  	case 7:
+  		sendAccelerometer();
+  		break;
+    case 8:
+      sendGPSSensor();
+      break;
+    case 9:
+      sendPressureSensor();
+      break;
+    case 10:
+      sendHumiditySensor();
+      break;
+    case 11:
+      sendLoudnessSensor();
+      break;
+    case 12:
+      sendAirQualitySensor();
+      break;
+    case 13:
+      sendBatteryLevel();
+      break;
+    case 14:
+      sendIntSensor();
+      break;
+    case 15:
+      sendFloatSensor();
+      break;
+    case 16:
+      sendBinaryDataSensor();
+      break;
 	}
+  dumpModemParams();
+  printInfo();
+  debugSerial.println(F("--------------------------------------------"));
 	sensorSelect++;
 	sensorSelect %= 6;
 
 }
+void dumpSendResult(Sensor& sns){
+  bool sendResult = libTest.send(sns,true);
+  debugSerial.print(F("Send succeeded : "));
+  debugSerial.println(sendResult ? "YES" : "NO");
+}
 
-void sendBoolSensor() {
-	debugSerial.println("Sending BOOLEAN data ....");
-	BinarySensor bSens(false);
-	bool sendResult = libTest.sendSafe(bSens);
-	debugSerial.print(F("Send succeeded : "));
-	debugSerial.println(sendResult ? "YES" : "NO");
-	debugSerial.println(F("--------------------------------------------"));
+
+void sendBoolSensor() {// 1
+	debugSerial.println("Sending BoolSensor data ....");
+	BinarySensor bSens(true);
+  dumpSendResult(bSens);
 }
-void sendIntSensor() {
-	debugSerial.println("Sending INTEGER data ....");
-	IntegerSensor iSens(666);
-	bool sendResult = libTest.sendSafe(iSens);
-	debugSerial.print(F("Send succeeded : "));
-	debugSerial.println(sendResult ? "YES" : "NO");
-	debugSerial.println(F("--------------------------------------------"));
+void sendBinaryTiltSensor(){// 2
+  debugSerial.println("Sending BinaryTiltSensor data ....");
+  BinaryTiltSensor bSens(true);
+  dumpSendResult(bSens);
 }
-void sendFloatSensor() {
-	debugSerial.println("Sending FLOAT data ....");
-	FloatSensor fSens((float) -58.6);
-	bool sendResult = libTest.sendSafe(fSens);
-	debugSerial.print(F("Send succeeded : "));
-	debugSerial.println(sendResult ? "YES" : "NO");
-	debugSerial.println(F("--------------------------------------------"));
+void sendPushButton(){// 3
+  debugSerial.println("Sending PushButton data ....");
+  PushButton bSens(true);
+  dumpSendResult(bSens);
 }
-void sendBinaryDataSensor() {
-	debugSerial.println("Sending RAW data ....");
-	BinaryPayload rawSens(
-			(uint8_t*) "Greetings from the ATT - Kit with the mDot modem.", 49);
-	bool sendResult = libTest.sendSafe(rawSens);
-	debugSerial.print(F("Send succeeded : "));
-	debugSerial.println(sendResult ? "YES" : "NO");
-	debugSerial.println(F("--------------------------------------------"));
+void sendDoorSensor(){// 4 
+  debugSerial.println("Sending DoorSensor data ....");
+  DoorSensor bSens(true);
+  dumpSendResult(bSens);
 }
-void sendGPSSensor() {
-	debugSerial.println("Sending GPS data ....");
-	GPSSensor gpsSensor(4.3, 51.222, 15.5, 0);
-	bool sendResult = libTest.sendSafe(gpsSensor);
-	debugSerial.print(F("Send succeeded : "));
-	debugSerial.println(sendResult ? "YES" : "NO");
-	debugSerial.println(F("--------------------------------------------"));
+void sendTemperatureSensor(){// 5
+  debugSerial.println("Sending TemperatureSensor data ....");
+  TemperatureSensor fSens((float) 22.5);
+  dumpSendResult(fSens);
 }
-void sendAccelSensor() {
-	debugSerial.println("Sending ACCEL data ....");
-	Accelerometer accSensor(12.2, 2.1, 0);
-	bool sendResult = libTest.sendSafe(accSensor);
-	debugSerial.print(F("Send succeeded : "));
-	debugSerial.println(sendResult ? "YES" : "NO");
-	debugSerial.println(F("--------------------------------------------"));
+void sendLightSensor(){// 6 
+  debugSerial.println("Sending LightSensor data ....");
+  LightSensor fSens((float) 22.5);
+  dumpSendResult(fSens);
+}
+void sendMotionSensor(){// 7 
+  debugSerial.println("Sending MotionSensor data ....");
+  MotionSensor bSens(true);
+  dumpSendResult(bSens);
+}
+void sendAccelerometer() {// 8
+  debugSerial.println("Sending Accelerometer data ....");
+  Accelerometer accSens(12.2, 2.1, 0);
+  dumpSendResult(accSens);
+}
+void sendGPSSensor() {// 9
+  debugSerial.println("Sending GPSSensor data ....");
+  GPSSensor gpsSens(4.3, 51.222, 15.5, 0);
+  dumpSendResult(gpsSens);
+}
+void sendPressureSensor() {// 10
+  debugSerial.println("Sending PressureSensor data ....");
+  PressureSensor fSens((float) 1013.85);
+  dumpSendResult(fSens);
+}// 11 HumiditySensor
+void sendHumiditySensor() {// 11 
+  debugSerial.println("Sending HumiditySensor data ....");
+  HumiditySensor fSens((float) 1013.85);
+  dumpSendResult(fSens);
+}
+void sendLoudnessSensor() {// 12
+  debugSerial.println("Sending LoudnessSensor data ....");
+  LoudnessSensor fSens((float) 35.6);
+  dumpSendResult(fSens);
+}
+void sendAirQualitySensor() {// 13
+  debugSerial.println("Sending AirQualitySensor data ....");
+  AirQualitySensor iSens(95);
+  dumpSendResult(iSens);
+}
+void sendBatteryLevel() {// 14 
+  debugSerial.println("Sending BatteryLevel data ....");
+  BatteryLevel iSens(666);
+  dumpSendResult(iSens);
+}
+void sendIntSensor() {// 15
+  debugSerial.println("Sending INTEGER data ....");
+  IntegerSensor iSens(666);
+  dumpSendResult(iSens);
+}
+void sendFloatSensor() {// 16
+  debugSerial.println("Sending FLOAT data ....");
+  FloatSensor fSens((float) -58.6);
+  dumpSendResult(fSens);
+}
+void sendBinaryDataSensor() {// 17
+  debugSerial.println("Sending BinaryDataSensor data ....");
+  BinaryPayload rawSens(
+      (uint8_t*) "Greetings from the ATT - Kit with the mDot modem.", 49);
+  dumpSendResult(rawSens);
 }
 void sloop() {
 //	debugSerial.println("Looping ....");
@@ -337,21 +446,28 @@ void addMillis(unsigned long inc_millis) {
 	SREG = oldSREG;
 }
 
+void printInfo(){
+  debugSerial.print(F("FREEMem : "));
+  debugSerial.print(freeRam());
+  debugSerial.print(F(" bytes"));
+  debugSerial.print(F("\t QueueSize : "));
+  debugSerial.print(libTest.sendQueueSize());
+  debugSerial.print(F("/"));
+  debugSerial.print(LoRaModem::MAX_QUEUE);
+  debugSerial.print(F("\t Can send immediately : "));
+  debugSerial.print(libTest.canSendImmediately() ? "YES" : "NO");
+  debugSerial.println();
+}
+
+
 // sleep for 8s using watchdog
 void loop() {
 	if (connection) {
 		sloop();
 
-		debugSerial.print(F("FREEMem : "));
-		debugSerial.print(freeRam());
-		debugSerial.print(F(" bytes"));
-		debugSerial.print(F("\t QueueSize : "));
-		debugSerial.print(libTest.sendQueueSize());
-		debugSerial.print(F("/"));
-		debugSerial.print(LoRaModem::MAX_QUEUE);
-		debugSerial.print(F("\t Can send immediately : "));
-		debugSerial.println(libTest.canSendImmediately() ? "YES" : "NO");
-
+    //printInfo();
+    
+#if defined (__AVR_ATmega328P__)
 		// Interrupt stuff
 		{
 			// Enter power down state with ADC and BOD module disabled.
@@ -367,6 +483,9 @@ void loop() {
 			//detachInterrupt(IRQ);
 			debugSerial.begin(SERIAL_BAUD);
 		}
+#else
+     delay(1000);
+#endif
 	} else {
 		debugSerial.print(F("MODEM (4) : "));
 		debugSerial.println(modem.getParam(MODEM));
@@ -395,3 +514,5 @@ void loop() {
 		delay(120000);
 	}
 }
+
+
