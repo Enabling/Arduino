@@ -174,6 +174,12 @@ void setup() {
 
 	// INT0
 	pinMode(2, INPUT_PULLUP);
+
+
+  dumpModemParams();
+  printInfo();
+  debugSerial.println(F("--------------------------------------------"));
+
 }
 
 // found at learn.adafruit.com/memories-of-an-arduino/measuring-free-memory
