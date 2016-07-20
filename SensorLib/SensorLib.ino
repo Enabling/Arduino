@@ -293,7 +293,7 @@ void sendSensor() {
   printInfo();
   debugSerial.println(F("--------------------------------------------"));
 	sensorSelect++;
-	sensorSelect %= 6;
+	sensorSelect %= 17;
 
 }
 void dumpSendResult(Sensor& sns){
