@@ -392,8 +392,21 @@ unsigned char LoRaModemMicrochip::onMacRX() {
 
 	// payload
 	token = strtok(NULL, " "); // until end of string
-	memcpy(this->receivedPayloadBuffer, token, strlen(token) + 1); // TODO check for buffer limit
-
+  int tokenLen = strlen(token);
+  if (tokenLen > 1){// should be 2 or bigger to contain valid data !!?  (Hex$ pairs)
+    // parse HEX $ token to byte*
+    int outCnt = 0;
+    for(int loop = 0; loop < tokenLen;loop += 2){
+      this->receivedPayloadBuffer[outCnt++] = HEX_PAIR_TO_BYTE(token[loop],token[loop+1]);
+    }
+    downlinkDataSize = outCnt;
+#ifdef FULLDEBUG
+    PRINTF("Decoded ");
+    PRINT(outCnt);
+    PRINTLNF(" bytes of incoming data.");
+#endif
+  	// memcpy(this->receivedPayloadBuffer, token, strlen(token) + 1); // TODO check for buffer limit
+  }
 	return NoError;
 }
 
@@ -417,7 +430,8 @@ int LoRaModemMicrochip::getParam(instrumentationParam param) {
 		return 0;
 	}
 	case POWER_INDEX: {
-		char* val = getParam("mac", "pwridx");
+		//char* val = getParam("mac", "pwridx");
+    char* val = getParam("radio", "pwr");
 		return atoi(val);
 	}
 	case BANDWIDTH: {
@@ -693,4 +707,9 @@ unsigned long LoRaModemMicrochip::getSendBackOffMs() {
 	//  read_EEPROM(EEPROM_ADDR_BACKOFF_SEND, result);
 	//  return result;
 	return _sendBackOffMs;
+}
+
+// [100 .. 4294967296]
+void LoRaModemMicrochip::sleep(unsigned long timeToSleepMs){
+  sendSysCmd("sys sleep " + timeToSleepMs);
 }

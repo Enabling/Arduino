@@ -86,6 +86,7 @@ float LoRaModem::updateTimeOnAirBudget(float milliSeconds) {
 }
 
 bool LoRaModem::sendSafe(Sensor& sensorValue) {
+  downlinkDataSize = 0;
 	bool result = true;
 	// check if can be sent otherwise add to queue
 	LoRaPacket* thePacket = sensorValue.getAsBinary();
@@ -125,6 +126,7 @@ bool LoRaModem::sendSafe(Sensor& sensorValue) {
 }
 
 bool LoRaModem::send(Sensor& sensorValue, bool ack) {
+  downlinkDataSize = 0;
 	// what if still in Queueueueueue ????
 	// need to update the TOA usage even if not checking here ....
 	// do we need to add if ack and result == false ??
@@ -136,6 +138,7 @@ bool LoRaModem::send(Sensor& sensorValue, bool ack) {
 	return send(&p, ack);
 }
 void LoRaModem::processQueue() {
+  downlinkDataSize = 0;
 	processingQueue = true;
 	// anything in the Queue ?
 	if (packets.count() > 0) {
@@ -207,4 +210,17 @@ bool LoRaModem::storeTimeOnAirBudget(float budget) {
 }
 float LoRaModem::getTimeOnAirBudget() {
 	return _toaBudget;
+}
+
+bool LoRaModem::isDownlinkDataAvailable(){
+  return downlinkDataSize > 0;
+}
+
+byte LoRaModem::getDownlinkDataSize(){
+  return downlinkDataSize;
+}
+
+byte* LoRaModem::getDownlinkData(){
+  downlinkDataSize = 0;
+  return this->receivedPayloadBuffer;
 }

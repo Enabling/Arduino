@@ -81,3 +81,14 @@ byte Device::sendQueueSize(){
 bool Device::canSendImmediately(){
 	return _modem->canSendImmediately();
 }
+bool Device::isDownlinkDataAvailable(){
+	return _modem->isDownlinkDataAvailable();
+}
+
+byte Device::getDownlinkDataSize(){
+  return _modem->getDownlinkDataSize();
+}
+
+byte* Device::getDownlinkData(){
+	return _modem->getDownlinkData();
+}

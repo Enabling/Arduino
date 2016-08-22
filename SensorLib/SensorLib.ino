@@ -69,6 +69,7 @@ Device libTest(&modem, &debugSerial);
 GPSSensor gpsSensor;
 EnCoSensor enCoSensor;
 
+
 volatile boolean canSendFromQueue = false;
 volatile unsigned long lastMsgSent = millis();
 volatile boolean sendGPS = true;
@@ -241,7 +242,7 @@ void sendGPSData() {
 //	debugSerial.println(F("--------------------------------------------"));
 //}
 
-void sendSensor() {
+void sendSensor(int sensorSelect = 9) {
 	switch (sensorSelect) {
   	case 0:
   		sendBoolSensor();
@@ -298,9 +299,6 @@ void sendSensor() {
   dumpModemParams();
   printInfo();
   debugSerial.println(F("--------------------------------------------"));
-	sensorSelect++;
-	sensorSelect %= 17;
-
 }
 void dumpSendResult(Sensor& sns){
   bool sendResult = libTest.send(sns,true);
@@ -361,7 +359,7 @@ void sendPressureSensor() {// 10
 }// 11 HumiditySensor
 void sendHumiditySensor() {// 11 
   debugSerial.println("Sending HumiditySensor data ....");
-  HumiditySensor fSens((float) 1013.85);
+  HumiditySensor fSens((float) 50.50);
   dumpSendResult(fSens);
 }
 void sendLoudnessSensor() {// 12
@@ -415,7 +413,14 @@ void sloop() {
 		sendGPS = false;
 		//sendGPSData();
 //		sendEnCoSensor();
-		sendSensor();
+
+		sendSensor(9);
+   
+//    sendSensor(sensorSelect);
+//    sensorSelect++;
+//    sensorSelect %= 17;
+
+
 		updateQueueStatus();
 	} else {
 		if (++delayCnt >= 120) {

@@ -17,9 +17,14 @@
 // How big is our message Queue
 #define MAX_FIFO_SIZE 5
 
+#define DEFAULT_RECEIVED_PAYLOAD_BUFFER_SIZE 64
+
+
 //this class represents the ATT cloud platform.
 class LoRaModem {
 protected:
+  byte receivedPayloadBuffer[DEFAULT_RECEIVED_PAYLOAD_BUFFER_SIZE + 1];
+  byte downlinkDataSize = 0;
 
 	// define a leaner structure to store in Queue
 	struct Packet {
@@ -45,7 +50,7 @@ protected:
 
 	float _toaBudget; // keep track of the available time-on-air budget.
 
-	// PORT n° where messages get sent. Previously defined as const, but user might want to target different port
+	// PORT nï¿½ where messages get sent. Previously defined as const, but user might want to target different port
 	uint8_t _messagePort = 1;
 
 
@@ -136,6 +141,12 @@ public:
 
 	void processQueue();
 	boolean performChecks();
+
+  bool isDownlinkDataAvailable();
+  byte getDownlinkDataSize();
+  byte* getDownlinkData();
+  
+  
 };
 
 #endif /* LORAMODEM_H_ */

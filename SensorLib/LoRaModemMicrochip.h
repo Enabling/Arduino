@@ -11,7 +11,6 @@
 #define DEFAULT_PAYLOAD_SIZE 255
 #define PORT 1
 #define DEFAULT_INPUT_BUFFER_SIZE 96
-#define DEFAULT_RECEIVED_PAYLOAD_BUFFER_SIZE 64
 #define DEFAULT_TIMEOUT 120
 #define RECEIVE_TIMEOUT 60000
 #define MAX_SEND_RETRIES 4
@@ -63,7 +62,6 @@ private:
 	unsigned long _lastSendMs;
 
 	char inputBuffer[DEFAULT_INPUT_BUFFER_SIZE + 1];
-	char receivedPayloadBuffer[DEFAULT_RECEIVED_PAYLOAD_BUFFER_SIZE + 1];
 	unsigned char lookupMacTransmitError(const char* error);
 	unsigned char onMacRX();
 	unsigned short readLn(char* buf, unsigned short bufferSize,
@@ -93,13 +91,18 @@ private:
 
 	char* getParam(const char* baseName, const char* paramName,
 			unsigned short timeout = DEFAULT_TIMEOUT);
+	
 	char* getParam(const char* baseName, const char* paramName,
-			const char* paramValue, unsigned short timeout = DEFAULT_TIMEOUT);bool sendSysCmd(
+			const char* paramValue, unsigned short timeout = DEFAULT_TIMEOUT);
+			
+	bool sendSysCmd(
 			const char* paramName);
 
 protected:
 
 public:
+  void sleep(unsigned long timeToSleepMs);
+
 	bool storeLastSendMs(unsigned long timeToSend);
 
 	unsigned long getLastSendMs();

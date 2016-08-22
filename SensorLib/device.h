@@ -84,6 +84,11 @@ public:
 		_minTimeBetweenSend = minTimeBetweenSend;
 	};
 
+	bool isDownlinkDataAvailable();
+  byte getDownlinkDataSize();
+	byte* getDownlinkData();
+	
+	
 private:
 	Stream *_monitor;
 

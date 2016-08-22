@@ -21,8 +21,7 @@ char* int2str(register int i);
 
 // outputs the incoming byte-array as HEX characters on the destination,
 // and separating with specified char if needed
-void writeHex(uint8_t *data, uint8_t length, uint8_t *dest, uint8_t separator =
-		0);
+void writeHex(uint8_t *data, uint8_t length, uint8_t *dest, uint8_t separator = 0);
 
 #endif  /* UTILS_H_ */
 

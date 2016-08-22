@@ -15,7 +15,6 @@
 #include "instrumentationParamEnum.h"
 
 #define DEFAULT_INPUT_BUFFER_SIZE 96
-#define DEFAULT_RECEIVED_PAYLOAD_BUFFER_SIZE 64
 #define DEFAULT_TIMEOUT 120
 #define RECEIVE_TIMEOUT 60000
 #define MAX_SEND_RETRIES 10
@@ -83,7 +82,6 @@ public:
 
 private:
 	char inputBuffer[DEFAULT_INPUT_BUFFER_SIZE + 1];
-	char receivedPayloadBuffer[DEFAULT_RECEIVED_PAYLOAD_BUFFER_SIZE + 1];
 	unsigned short readLn(char* buf, unsigned short bufferSize,
 			unsigned short start = 0);
 
