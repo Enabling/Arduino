@@ -100,6 +100,7 @@ public:
 	bool send(Sensor& sensorValue, bool ack = false);
 
 	unsigned long getBackOffTimeMs();
+  unsigned long getRemainingBackOffTimeMs();
 
 	bool sendQueueIsFull();
 

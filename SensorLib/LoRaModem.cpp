@@ -5,11 +5,7 @@
 
 //#define developing
 
-#if defined developing
-#define TIME_CHECK 15000
-#else
-#define TIME_CHECK getSendBackOffMs()
-#endif
+
 
 void LoRaModem::blinkLed() {
 //	digitalWrite(LED1, !digitalRead(LED1));
@@ -96,8 +92,8 @@ bool LoRaModem::sendSafe(Sensor& sensorValue) {
 		result = false;
 	}
 	if (result) {
-		unsigned long elapsed = (unsigned long) (millis() - getLastSendMs());
-		if (packets.count() > 0 || elapsed < getSendBackOffMs()) {
+		// unsigned long elapsed = (unsigned long) (millis() - getLastSendMs());
+		if (packets.count() > 0 || getRemainingBackOffTimeMs() > 0) {
 			// Can we Queue ??
 			if (packets.count() < MAX_FIFO_SIZE) {
 				packets.enqueue(new Packet(thePacket));	// Delete after use !!!!!
@@ -143,7 +139,7 @@ void LoRaModem::processQueue() {
 	// anything in the Queue ?
 	if (packets.count() > 0) {
 		unsigned long elapsed = (unsigned long) (millis() - getLastSendMs());
-		if (elapsed > TIME_CHECK) {
+		if (elapsed > getBackOffTimeMs()) {
 			Serial.println(F("Q >"));
 			Packet* theDataPacket = packets.peek(); // use 1st sensor value from queue, leaving it on in case send fails ...
 			float toa = calculateTimeOnAir(theDataPacket->sizeOfData);
@@ -168,19 +164,34 @@ boolean LoRaModem::performChecks() {
 	// Process Queueueueueue??
 	if (packets.count() > 0) {
 		unsigned long elapsed = (unsigned long) (millis() - getLastSendMs());
-		return elapsed > TIME_CHECK; // millis() STOPS on sleep !!! SCREWED !! need EXTERNAL clock for timed operations !!
+		return elapsed > getBackOffTimeMs(); // millis() STOPS on sleep !!! SCREWED !! need EXTERNAL clock for timed operations !!
 	}
 	return false;
 }
 
 unsigned long LoRaModem::getBackOffTimeMs() {
+#if defined developing
+	return 30000;
+#else
 	unsigned long elapsed = (unsigned long) (millis() - getLastSendMs());
 	if (elapsed >= getSendBackOffMs()) {
 		return 0;
 	} else {
 		return getSendBackOffMs() - elapsed;
 	}
+#endif
 }
+
+unsigned long LoRaModem::getRemainingBackOffTimeMs() {
+  if(getLastSendMs() == 0) return 0;
+  unsigned long elapsed = (unsigned long) (millis() - getLastSendMs());
+  if (elapsed >= getBackOffTimeMs()) {
+    return 0;
+  } else {
+    return getBackOffTimeMs() - elapsed;
+  }
+}
+
 bool LoRaModem::sendQueueIsFull() {
 	return packets.count() == MAX_FIFO_SIZE;
 }

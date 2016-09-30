@@ -65,7 +65,7 @@ bool Device::send(Sensor& sensorValue, bool ack) {
 }
 
 unsigned long Device::getBackOffTimeMs() {
-	return _modem->getBackOffTimeMs();
+	return _modem->getRemainingBackOffTimeMs();
 }
 
 bool Device::sendQueueIsFull() {
