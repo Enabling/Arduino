@@ -131,7 +131,7 @@ void attemptModemConnection() {
 		wakeUP_RN2483(); // RN2483 specific -> see if we can move it into modem class itself
 		cntWakeUp++;
 		if (libTest.connect(DEV_ADDR, APPSKEY, NWKSKEY, true)) {
-			debugSerial.println(F("Connection to the network was successful."));
+			debugSerial.println(F("Connection to the modem was successful."));
 			connection = true;
 			modem.storeTimeOnAirBudget(30000);
 			pinMode(PIN_Q_FULL, OUTPUT);
@@ -153,7 +153,7 @@ void attemptModemConnection() {
 #endif
 				debugSerial.println(
 						F(
-								"Connection to the network failed!\n--== MoDeM init retry shortly ==--"));
+								"Connection to the modem failed!\n--== MoDeM init retry shortly ==--"));
 				delay(5000);
 #ifdef PIN_PWR_RN2483
 			}
