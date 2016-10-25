@@ -81,7 +81,7 @@ bool connection = false;
 
 void dumpModemParams(char sep = '\t'){
     debugSerial.print(F("SF : "));
-    debugSerial.print(modem.getParam(SP_FACTOR));
+    debugSerial.print(modem.getParam(SP_FACTOR) + 6);// method returns index from 0 .. 6
     debugSerial.print(sep);
     debugSerial.print(F("POW : "));
     debugSerial.print(modem.getParam(POWER_INDEX));
