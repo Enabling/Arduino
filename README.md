@@ -57,3 +57,7 @@ the delay between sends, the size of messages which all depend on the quality of
 Please feel free to comment, improve, suggest .......
 
 The EnCo team.
+
+#09/12/2016 Changes :
+- removed .ino script from library folder
+- added separate folders with samples and support libraries
