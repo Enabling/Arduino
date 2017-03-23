@@ -1,4 +1,5 @@
 #include "sensor.h"
+#include "Base64.h"
 
 void Sensor::updateTimestamp() {
 	_timestamp = millis();
@@ -35,6 +36,9 @@ LoRaPacket* BinarySensor::getAsBinary() {
 	_data.Add(_sensorValue);
 	return &_data;
 }
+int BinarySensor::getAsJson(char* into) {
+  return sprintf(into,"{\"value\":%s}",_sensorValue ? "true" : "false");
+}
 // //////////
 IntegerSensor::IntegerSensor() :
 		Sensor(15) {
@@ -54,6 +58,9 @@ LoRaPacket* IntegerSensor::getAsBinary() {
 	_data.SetId(_streamId);
 	_data.Add(_sensorValue);
 	return &_data;
+}
+int IntegerSensor::getAsJson(char* into) {
+  return sprintf(into,"{\"value\":%d}",_sensorValue);
 }
 // //////////
 FloatSensor::FloatSensor(int id) :
@@ -77,6 +84,11 @@ LoRaPacket* FloatSensor::getAsBinary() {
 	_data.SetId(_streamId);
 	_data.Add(_sensorValue);
 	return &_data;
+}
+int FloatSensor::getAsJson(char* into) {
+  char floats[15];
+  dtostrf(_sensorValue,4,2,floats);
+  return sprintf(into,"{\"value\":%s}",floats);
 }
 // //////////
 BinaryTiltSensor::BinaryTiltSensor() :
@@ -162,6 +174,15 @@ LoRaPacket* Accelerometer::getAsBinary() {
 	_data.Add(_accelZ);
 	return &_data;
 }
+int Accelerometer::getAsJson(char* into) {
+  char floatx[15];
+  char floaty[15];
+  char floatz[15];
+  dtostrf(_accelX,4,2,floatx);
+  dtostrf(_accelY,4,2,floaty);
+  dtostrf(_accelZ,4,2,floatz);
+  return sprintf(into,"{\"x\":%s,\"y\":%s,\"z\":%s}",floatx,floaty,floatz);
+}
 // //////////
 GPSSensor::GPSSensor() :
 		Sensor(9) {
@@ -206,6 +227,17 @@ LoRaPacket* GPSSensor::getAsBinary() {
 	_data.Add(_altitude);
 	_data.Add(_timestamp);
 	return &_data;
+}
+int GPSSensor::getAsJson(char* into) {
+  char floatlat[15];
+  char floatlon[15];
+  char floatalt[15];
+  char floatts[15];
+  dtostrf(_latitude,4,2,floatlat);
+  dtostrf(_longitude,4,2,floatlon);
+  dtostrf(_altitude,4,2,floatalt);
+  dtostrf(_timestamp,4,2,floatts);
+  return sprintf(into,"{\"lat\":%s,\"lon\":%s,\"alt\":%s,\"ts\":%s}",floatlat,floatlon,floatalt,floatts);
 }
 // //////////
 PressureSensor::PressureSensor() :
@@ -255,6 +287,8 @@ BatteryLevel::BatteryLevel(int sensorValue) :
 BinaryPayload::~BinaryPayload() {
 	if (_sensorValue != NULL) {
 		free(_sensorValue);
+   _sensorValue = NULL;
+   _dataLength = 0;
 	}
 }
 BinaryPayload::BinaryPayload() :
@@ -273,16 +307,25 @@ LoRaPacket* BinaryPayload::getAsBinary() {
 void BinaryPayload::value(const uint8_t* binary, const uint8_t dataLen) {
 	if (_sensorValue != NULL) {
 		free(_sensorValue);
+    _sensorValue = NULL;
 		_dataLength = 0;
 	}
 	if (binary != NULL && dataLen > 0) {
-		_sensorValue = (uint8_t*) malloc(dataLen);
+		_sensorValue = (char*) malloc(dataLen);
 		if (_sensorValue) {
 			memcpy(_sensorValue, binary, dataLen);
 			_dataLength = dataLen;
-		} // else ERROR !!!!
+		  // else ERROR !!!!
+		}
 	}
 }
+int BinaryPayload::getAsJson(char* into) {
+  int encodedLen = base64_enc_len(_dataLength);
+  char encoded[encodedLen];
+  base64_encode(encoded, _sensorValue, _dataLength);
+  return sprintf(into,"{\"b64value\":\"%s\"}",encoded);
+}
+
 // TODO : Use as base for better defined sensor
 LoRaPacket* EnCoSensor::getAsBinary() {
 	_data.reset();

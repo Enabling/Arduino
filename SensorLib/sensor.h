@@ -13,7 +13,8 @@ protected:
 	void updateTimestamp();
 	Sensor(int streamId);
 public:
-	virtual LoRaPacket* getAsBinary() = 0;
+  virtual LoRaPacket* getAsBinary() = 0;
+  virtual int getAsJson(char* into) = 0;
 	virtual ~Sensor();
 };
 
@@ -35,7 +36,9 @@ protected:
 public:
 	BinarySensor();
 	BinarySensor(bool sensorValue);
-	LoRaPacket* getAsBinary();bool value();
+	LoRaPacket* getAsBinary();
+  int getAsJson(char* into);
+	bool value();
 	void value(bool sensorValue);
 };
 
@@ -47,6 +50,7 @@ public:
 	IntegerSensor();
 	IntegerSensor(int sensorValue);
 	LoRaPacket* getAsBinary();
+  int getAsJson(char* into);
 	int value();
 	void value(int sensorValue);
 };
@@ -60,6 +64,7 @@ public:
 	FloatSensor();
 	FloatSensor(float sensorValue);
 	LoRaPacket* getAsBinary();
+  int getAsJson(char* into);
 	float value();
 	void value(float sensorValue);
 };
@@ -112,6 +117,7 @@ public:
 	Accelerometer();
 	Accelerometer(float accelX, float accelY, float accelZ);
 	virtual LoRaPacket* getAsBinary();
+  int getAsJson(char* into);
 	void setX(float accelX);
 	float getX();
 	void setY(float accelY);
@@ -131,6 +137,7 @@ public:
 	GPSSensor();
 	GPSSensor(float longitude, float latitude, float alt, float timestamp);
 	virtual LoRaPacket* getAsBinary();
+  int getAsJson(char* into);
 	void setLongitude(float longitude);
 	float getLongitude();
 	void setLatitude(float latitude);
@@ -173,7 +180,7 @@ public:
 /////////////////BinaryPayload//////////////////////
 class BinaryPayload: public Sensor {
 protected:
-	uint8_t* _sensorValue = NULL;
+	char* _sensorValue = NULL;
 	uint8_t _dataLength = 0;
 
 public:
@@ -181,6 +188,7 @@ public:
 	BinaryPayload();
 	BinaryPayload(const uint8_t* binary,const uint8_t dataLen);
 	virtual LoRaPacket* getAsBinary();
+  int getAsJson(char* into);
 	void value(const uint8_t* binary, const uint8_t dataLen);
 };
 
